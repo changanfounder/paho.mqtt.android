@@ -31,6 +31,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.eclipse.paho.client.mqttv3.MqttPingSender;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
 import android.app.Service;
@@ -118,7 +119,7 @@ class MqttConnection implements MqttCallbackExtended {
 	// our client object - instantiated on connect
 	private MqttAsyncClient myClient = null;
 
-	private AlarmPingSender alarmPingSender = null;
+	private MqttPingSender mqttPingSender = null;
 
 	// our (parent) service object
 	private MqttService service = null;
@@ -285,9 +286,8 @@ class MqttConnection implements MqttCallbackExtended {
 			
 			// if myClient is null, then create a new connection
 			else {
-				alarmPingSender = new AlarmPingSender(service);
-				myClient = new MqttAsyncClient(serverURI, clientId,
-						persistence, alarmPingSender);
+				mqttPingSender = new HandlerPingSender();
+				myClient = new MqttAsyncClient(serverURI, clientId, persistence, mqttPingSender);
 				myClient.setCallback(this);
 
 				service.traceDebug(TAG,"Do Real connect!");
@@ -825,8 +825,7 @@ class MqttConnection implements MqttCallbackExtended {
 			} else {
 				// Using the new Automatic reconnect functionality.
 				// We can't force a disconnection, but we can speed one up
-				alarmPingSender.schedule(100);
-
+				mqttPingSender.schedule(100);
 			}
 		} catch (Exception e) {
 			// ignore it - we've done our best

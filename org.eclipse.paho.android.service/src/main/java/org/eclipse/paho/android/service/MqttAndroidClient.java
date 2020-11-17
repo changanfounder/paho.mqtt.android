@@ -56,6 +56,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.util.SparseArray;
 
 /**
@@ -108,11 +109,17 @@ public class MqttAndroidClient extends BroadcastReceiver implements
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder binder) {
-			mqttService = ((MqttServiceBinder) binder).getService();
-			bindedService = true;
-			// now that we have the service available, we can actually
-			// connect...
-			doConnect();
+			try {
+				if (binder instanceof MqttServiceBinder) {
+					mqttService = ((MqttServiceBinder) binder).getService();
+					bindedService = true;
+					// now that we have the service available, we can actually
+					// connect...
+					doConnect();
+				}
+			} catch (Exception e) {
+				Log.e("onServiceConnected", "e:" + e);
+			}
 		}
 
 		@Override
@@ -1669,7 +1676,7 @@ public class MqttAndroidClient extends BroadcastReceiver implements
 	public void deleteBufferedMessage(int bufferIndex){
 		mqttService.deleteBufferedMessage(clientHandle, bufferIndex);
 	}
-	
+
 	/**
 	 * Get the SSLSocketFactory using SSL key store and password
 	 * <p>

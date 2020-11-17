@@ -36,25 +36,25 @@ configurations {
 }
 
 dependencies {
-    compile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:${rootProject.ext.clientVersion}"
-    compile "com.android.support:support-v4:${rootProject.ext.supportLibVersion}"
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:${rootProject.ext.clientVersion}"
+    implementation "com.android.support:support-v4:${rootProject.ext.supportLibVersion}"
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 }
 
-android.libraryVariants.all { variant ->
-    task("generate${variant.name}Javadoc", type: Javadoc) {
-        title = "$name $version API"
-        description "Generates Javadoc for $variant.name."
-        source = variant.javaCompile.source
-        ext.androidJar =
-                "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
-        options.links("http://docs.oracle.com/javase/7/docs/api/");
-        options.links("http://d.android.com/reference/");
-        exclude '**/BuildConfig.java'
-        exclude '**/R.java'
-    }
-}
+//android.libraryVariants.all { variant ->
+//    task("generate${variant.name}Javadoc", type: Javadoc) {
+//        title = "$name $version API"
+//        description "Generates Javadoc for $variant.name."
+//        source = variant.javaCompile.source
+//        ext.androidJar =
+//                "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+//        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+//        options.links("http://docs.oracle.com/javase/7/docs/api/");
+//        options.links("http://d.android.com/reference/");
+//        exclude '**/BuildConfig.java'
+//        exclude '**/R.java'
+//    }
+//}
 
 // Generate Sources Jar
 task("generateSourcesJar", type: Jar) {
@@ -84,50 +84,50 @@ task("generateLibraryJar", type: Jar) {
 }
 
 // Generate Javadoc
-task("generateJavaDocJar", type: Jar, dependsOn: (rootProject.ext.serviceVersion.endsWith('-SNAPSHOT') ? 'generatedebugJavadoc' : 'generatereleaseJavadoc')){
-    from("$buildDir/docs/javadoc")
-    classifier = 'javadoc'
-}
+//task("generateJavaDocJar", type: Jar, dependsOn: (rootProject.ext.serviceVersion.endsWith('-SNAPSHOT') ? 'generatedebugJavadoc' : 'generatereleaseJavadoc')){
+//    from("$buildDir/docs/javadoc")
+//    classifier = 'javadoc'
+//}
 
-publishing {
-    publications {
-        paho(MavenPublication) {
-            groupId 'org.eclipse.paho'
-            artifact generateSourcesJar
-            artifact generateLibraryJar
-            artifact generateJavaDocJar
-            artifact "$buildDir/outputs/aar/" + rootProject.ext.serviceArchivesBaseName + "-" + rootProject.ext.serviceVersion + ".aar"
-        }
-    }
-    repositories {
-        if (project.hasProperty('eclipseRepoUsername')) {
-            maven {
-                name 'eclipse'
-                url 'https://repo.eclipse.org/content/repositories/paho-' + (rootProject.ext.serviceVersion.endsWith('-SNAPSHOT') ? 'snapshots/' : 'releases/')
-                credentials {
-                    username eclipseRepoUsername
-                    password eclipseRepoPassword
-                }
-            }
-        } else {
-            maven {
-                url "$buildDir/repo"
-            }
-        }
-    }
-}
+//publishing {
+//    publications {
+//        paho(MavenPublication) {
+//            groupId 'org.eclipse.paho'
+//            artifact generateSourcesJar
+//            artifact generateLibraryJar
+//            artifact generateJavaDocJar
+//            artifact "$buildDir/outputs/aar/" + rootProject.ext.serviceArchivesBaseName + "-" + rootProject.ext.serviceVersion + ".aar"
+//        }
+//    }
+//    repositories {
+//        if (project.hasProperty('eclipseRepoUsername')) {
+//            maven {
+//                name 'eclipse'
+//                url 'https://repo.eclipse.org/content/repositories/paho-' + (rootProject.ext.serviceVersion.endsWith('-SNAPSHOT') ? 'snapshots/' : 'releases/')
+//                credentials {
+//                    username eclipseRepoUsername
+//                    password eclipseRepoPassword
+//                }
+//            }
+//        } else {
+//            maven {
+//                url "$buildDir/repo"
+//            }
+//        }
+//    }
+//}
 
 
-task debug << {
-    configurations.compile.each { println it}
-}
-// Required to bundle Java library Jar in AAR
-clean.doLast{
-    copyLibs.execute()
-}
-assemble.doLast {
-    renameReleaseAAR.execute()
-}
+//task debug << {
+//    configurations.compile.each { println it}
+//}
+//// Required to bundle Java library Jar in AAR
+//clean.doLast{
+//    copyLibs.execute()
+//}
+//assemble.doLast {
+//    renameReleaseAAR.execute()
+//}
 
 clean.doFirst {
     delete 'libs'
